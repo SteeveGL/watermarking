@@ -1,21 +1,20 @@
-import os
+import os, sys
 
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-resize_percentage = 75
-transparency = 20
+# transparency = 20
 
-watermark_file = Image.open("watermark.png")
-watermark_file2 = watermark_file.copy()
-watermark_file2.putalpha(int(255 * (transparency / 100)))
-watermark_file.paste(watermark_file2, watermark_file) # type: ignore
+# watermark_file = Image.open("watermark.png")
+# watermark_file2 = watermark_file.copy()
+# watermark_file2.putalpha(int(255 * (transparency / 100)))
+# watermark_file.paste(watermark_file2, watermark_file) # type: ignore
 
-for file in os.listdir("import"):
+for file in os.listdir(sys.argv[1]):
   if file.lower().endswith(".jpg"):
     # Open the original image
-    original_image = Image.open(os.path.join("import", file))
+    original_image = Image.open(os.path.join(sys.argv[1], file))
 
     # Open the watermark image
     watermark_image = Image.open("watermark.png")
@@ -40,7 +39,7 @@ for file in os.listdir("import"):
     # Adjust the opacity of the watermark by modifying the alpha channel
     watermark_image = watermark_image.convert("RGBA")
     watermark_data = watermark_image.getdata()
-    watermark_data_with_opacity = [(r, g, b, int(a * 0.5)) for r, g, b, a in watermark_data]
+    watermark_data_with_opacity = [(r, g, b, int(a * 0.6)) for r, g, b, a in watermark_data]
     watermark_image.putdata(watermark_data_with_opacity)
 
     # Create a transparent watermark image with the same size as the original
@@ -66,7 +65,7 @@ for file in os.listdir("import"):
     draw = ImageDraw.Draw(watermarked_image)
 
     # Calculate the text dimensions and position
-    text = f"{filename.replace("IMG_", "")}"
+    text = f"# {filename.replace("IMG_", "")} #"
     text_bbox = draw.textbbox((0, 0), text, font=font)
     text_width, text_height = text_bbox[2] - text_bbox[0], text_bbox[3] - text_bbox[1]
     text_x = (image_width - text_width) // 2
@@ -86,7 +85,10 @@ for file in os.listdir("import"):
     draw.text((text_x, text_y), text, font=font, fill=text_color)
 
     # Save the watermarked image
-    watermarked_image.convert("RGB").save(f"./copyrighted/{file}", "JPEG")
+    copyrighted_path = f"{sys.argv[1]}/copyrighted"
+    if not os.path.exists(copyrighted_path):
+      os.mkdir(copyrighted_path)
+    watermarked_image.convert("RGB").save(f"{copyrighted_path}/{file}", "JPEG")
 
     ## Watermarked
     # Open the watermark image
@@ -123,4 +125,7 @@ for file in os.listdir("import"):
     watermarked_image = Image.alpha_composite(original_image.convert("RGBA"), watermark)
 
     # Save the watermarked image
-    watermarked_image.convert("RGB").save(f"./watermarked/{file}", "JPEG")
+    watermarked_path = f"{sys.argv[1]}/watermarked"
+    if not os.path.exists(watermarked_path):
+      os.mkdir(watermarked_path)
+    watermarked_image.convert("RGB").save(f"{watermarked_path}/{file}", "JPEG")
