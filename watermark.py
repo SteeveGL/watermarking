@@ -13,9 +13,12 @@ from PIL import ImageFont
 
 for file in os.listdir(sys.argv[1]):
   if file.lower().endswith(".jpg"):
+    print(f"Processing '{file}'")
+
     # Open the original image
     original_image = Image.open(os.path.join(sys.argv[1], file))
 
+    ## Copyright ##
     # Open the watermark image
     watermark_image = Image.open("watermark.png")
 
@@ -90,7 +93,7 @@ for file in os.listdir(sys.argv[1]):
       os.mkdir(copyrighted_path)
     watermarked_image.convert("RGB").save(f"{copyrighted_path}/{file}", "JPEG")
 
-    ## Watermarked
+    ## Watermarked ##
     # Open the watermark image
     watermark_image = Image.open("watermark.png")
 
@@ -100,7 +103,10 @@ for file in os.listdir(sys.argv[1]):
     scaling_factor = min(width_ratio, height_ratio)
 
     # Apply a scaling parameter (adjust as needed)
-    scaling_parameter = 0.2  # Adjust the scale as a fraction (e.g., 0.5 for 50% scale)
+    scaling_parameter = 1 / scaling_factor  # Adjust the scale as a fraction (e.g., 0.5 for 50% scale)
+
+    # if original_image.width > original_image.height:
+    #   scaling_parameter = scaling_parameter / 2
 
     # Calculate the scaled dimensions of the watermark
     new_width = int(watermark_image.width * scaling_factor * scaling_parameter)
@@ -114,7 +120,7 @@ for file in os.listdir(sys.argv[1]):
     # Adjust the opacity of the watermark by modifying the alpha channel
     watermark_image = watermark_image.convert("RGBA")
     watermark_data = watermark_image.getdata()
-    watermark_data_with_opacity = [(r, g, b, int(a * 0.8)) for r, g, b, a in watermark_data]
+    watermark_data_with_opacity = [(r, g, b, int(a * 0.9)) for r, g, b, a in watermark_data]
     watermark_image.putdata(watermark_data_with_opacity)
 
     # Create a transparent watermark image with the same size as the original
